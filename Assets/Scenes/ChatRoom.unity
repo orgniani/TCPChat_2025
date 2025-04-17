@@ -408,7 +408,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Enter text...
+  m_text: Enter Port...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7c786f74cda216f4ba4cba01f839a73f, type: 2}
   m_sharedMaterial: {fileID: -1435771665344873290, guid: 7c786f74cda216f4ba4cba01f839a73f, type: 2}
@@ -640,7 +640,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Enter text...
+  m_text: Enter IP...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7c786f74cda216f4ba4cba01f839a73f, type: 2}
   m_sharedMaterial: {fileID: -1435771665344873290, guid: 7c786f74cda216f4ba4cba01f839a73f, type: 2}
@@ -1033,7 +1033,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 567cc984fa3527e43824c66c125a673b, type: 3}
+  m_Sprite: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1204,7 +1204,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8980393, g: 0.14509805, b: 0.32941177, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2623,6 +2623,7 @@ GameObject:
   - component: {fileID: 1091274067}
   - component: {fileID: 1091274066}
   - component: {fileID: 1091274065}
+  - component: {fileID: 1091274069}
   m_Layer: 5
   m_Name: ChatCanvas
   m_TagString: Untagged
@@ -2715,6 +2716,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1091274069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1091274064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4947d6732a89b841956b013a61c0c41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chatScroll: {fileID: 453748105}
+  chatText: {fileID: 1879019992}
+  messageInputField: {fileID: 479418710}
+  sendButton: {fileID: 870241831}
 --- !u!1 &1306495593
 GameObject:
   m_ObjectHideFlags: 0
@@ -3396,6 +3413,7 @@ GameObject:
   - component: {fileID: 1694330691}
   - component: {fileID: 1694330690}
   - component: {fileID: 1694330689}
+  - component: {fileID: 1694330693}
   m_Layer: 5
   m_Name: NetworkSetupCanvas
   m_TagString: Untagged
@@ -3487,6 +3505,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1694330693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694330688}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 675c4998d7bc1924cb080739de498639, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverIpField: {fileID: 394121428}
+  serverPortField: {fileID: 987933046}
+  startSeverButton: {fileID: 760628387}
+  startClientButton: {fileID: 2081688072}
+  chatCanvas: {fileID: 1091274064}
 --- !u!1 &1699164671
 GameObject:
   m_ObjectHideFlags: 0
@@ -4184,7 +4219,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.0008360932}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1887772371
@@ -4253,6 +4288,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1981110227}
+  - component: {fileID: 1981110228}
   m_Layer: 0
   m_Name: TCPManager
   m_TagString: Untagged
@@ -4275,6 +4311,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1981110228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981110226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c5fe0eb1d7c5ab46b2586e9b6870be0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isPersistent: 1
 --- !u!1 &2016039455
 GameObject:
   m_ObjectHideFlags: 0
