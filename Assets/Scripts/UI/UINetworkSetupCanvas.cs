@@ -3,16 +3,19 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TCP;
-using Inputs;
+using Network;
 
 namespace UI
 {
     public class UINetworkSetupCanvas : MonoBehaviour
     {
+        [Header("Drop Down")]
+        [SerializeField] private TMP_Dropdown protocolDropdown;
+
         [Header("Text Fields")]
         [SerializeField] private TMP_InputField serverIpField;
         [SerializeField] private TMP_InputField serverPortField;
+        [SerializeField] private TMP_InputField usernameField;
 
         [Header("Buttons")]
         [SerializeField] private Button startSeverButton;
@@ -38,7 +41,7 @@ namespace UI
 
             closeButton.onClick.AddListener(OnCloseErrorCanvas);
 
-            TCPManager.Instance.OnConnectionFailed += HandleFailedConnection;
+            NetworkManager.Instance.OnConnectionFailed += HandleFailedConnection;
         }
 
         private void OnDisable()
@@ -48,26 +51,21 @@ namespace UI
 
             closeButton.onClick.RemoveListener(OnCloseErrorCanvas);
 
-            TCPManager.Instance.OnConnectionFailed -= HandleFailedConnection;
+            NetworkManager.Instance.OnConnectionFailed -= HandleFailedConnection;
         }
 
         private void OnStartServer()
         {
-            if (string.IsNullOrWhiteSpace(serverPortField.text))
-            {
-                ShowError("Please enter a valid port.");
-                return;
-            }
+            if (!ValidateInputs(out string ip, out int port)) return;
 
-            if (!int.TryParse(serverPortField.text, out int port) || port < 1024 || port > 65535)
-            {
-                ShowError("Port must be a number between 1024 and 65535.");
-                return;
-            }
+            NetworkProtocol selectedProtocol = (NetworkProtocol)protocolDropdown.value;
+            NetworkManager.Instance.SetProtocol(selectedProtocol);
+
+            //UserData.Username = usernameField.text;
 
             try
             {
-                TCPManager.Instance.StartServer(port);
+                NetworkManager.Instance.StartServer(port);
                 MoveToChatScreen();
             }
 
@@ -79,28 +77,19 @@ namespace UI
 
         private void OnConnectToServer()
         {
-            if (string.IsNullOrWhiteSpace(serverIpField.text) || string.IsNullOrWhiteSpace(serverPortField.text))
-            {
-                ShowError("Please enter both IP address and port.");
-                return;
-            }
+            if (!ValidateInputs(out string ip, out int port)) return;
 
-            if (!IPAddress.TryParse(serverIpField.text, out IPAddress ipAddress))
-            {
-                ShowError("Invalid IP format.");
-                return;
-            }
+            NetworkProtocol selectedProtocol = (NetworkProtocol)protocolDropdown.value;
+            NetworkManager.Instance.SetProtocol(selectedProtocol);
 
-            if (!int.TryParse(serverPortField.text, out int port) || port < 1024 || port > 65535)
-            {
-                ShowError("Port must be a number between 1024 and 65535.");
-                return;
-            }
+            //UserData.Username = usernameField.text;
+
+            NetworkManager.Instance.OnClientConnected += MoveToChatScreen;
 
             try
             {
-                TCPManager.Instance.OnClientConnected += MoveToChatScreen;
-                TCPManager.Instance.StartClient(ipAddress, port);
+                NetworkManager.Instance.ConnectToServer(ip, port);
+                MoveToChatScreen();
             }
 
             catch (Exception e)
@@ -129,6 +118,31 @@ namespace UI
         private void HandleFailedConnection()
         {
             ShowError("Failed to connect to the server. It may be offline or unreachable.");
+        }
+        private bool ValidateInputs(out string ip, out int port)
+        {
+            ip = serverIpField.text;
+            port = 0;
+
+            if (string.IsNullOrWhiteSpace(usernameField.text))
+            {
+                ShowError("Enter a username.");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(ip) || !IPAddress.TryParse(ip, out _))
+            {
+                ShowError("Invalid IP.");
+                return false;
+            }
+
+            if (!int.TryParse(serverPortField.text, out port) || port < 1024 || port > 65535)
+            {
+                ShowError("Port must be between 1024 and 65535.");
+                return false;
+            }
+
+            return true;
         }
 
         private void ValidateReferences()

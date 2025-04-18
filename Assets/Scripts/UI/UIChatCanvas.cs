@@ -1,7 +1,7 @@
 using Inputs;
 using System;
 using System.Text;
-using TCP;
+using Network;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,7 +28,7 @@ namespace UI
             ValidateReferences();
 
             chatText.text = string.Empty;
-            TCPManager.Instance.OnDataReceived += OnReceiveData;
+            NetworkManager.Instance.OnDataReceived += OnReceiveData;
             sendButton.onClick.AddListener(OnSendMessage);
 
             inputReader.OnSendMessagePressed += OnSendMessage;
@@ -36,7 +36,7 @@ namespace UI
 
         private void OnDisable()
         {
-            TCPManager.Instance.OnDataReceived -= OnReceiveData;
+            NetworkManager.Instance.OnDataReceived -= OnReceiveData;
             sendButton.onClick.RemoveListener(OnSendMessage);
 
             inputReader.OnSendMessagePressed -= OnSendMessage;
@@ -49,9 +49,6 @@ namespace UI
 
         private void OnReceiveData(byte[] data)
         {
-            if (TCPManager.Instance.IsServer)
-                TCPManager.Instance.BroadcastData(data);
-
             chatText.text += Encoding.UTF8.GetString(data, 0, data.Length) + Environment.NewLine;
             UpdateScroll();
         }
@@ -63,15 +60,13 @@ namespace UI
 
             byte[] data = Encoding.UTF8.GetBytes(messageInputField.text);
 
-            if (TCPManager.Instance.IsServer)
+            if (NetworkManager.Instance.IsServer)
             {
                 chatText.text += messageInputField.text + Environment.NewLine;
                 UpdateScroll();
-                TCPManager.Instance.BroadcastData(data);
             }
 
-            else
-                TCPManager.Instance.SendDataToServer(data);
+            NetworkManager.Instance.SendData(data);
 
             messageInputField.text = string.Empty;
             messageInputField.ActivateInputField();
