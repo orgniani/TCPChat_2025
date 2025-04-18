@@ -5,6 +5,7 @@ using Network;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 namespace UI
 {
@@ -44,6 +45,12 @@ namespace UI
 
         private void UpdateScroll()
         {
+            StartCoroutine(ScrollToBottomNextFrame());
+        }
+
+        private IEnumerator ScrollToBottomNextFrame()
+        {
+            yield return new WaitForEndOfFrame();
             chatScroll.verticalNormalizedPosition = 0f;
         }
 
