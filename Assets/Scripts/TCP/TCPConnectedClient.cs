@@ -61,8 +61,17 @@ namespace TCP
 
         public void OnEndConnection(IAsyncResult asyncResult)
         {
-            _client.EndConnect(asyncResult);
-            NetworkStream.BeginRead(_readBuffer, 0, _readBuffer.Length, OnRead, null);
+            try
+            {
+                _client.EndConnect(asyncResult);
+                NetworkStream.BeginRead(_readBuffer, 0, _readBuffer.Length, OnRead, null);
+            }
+
+            catch (Exception ex)
+            {
+                Debug.LogError($"Connection failed: {ex.Message}");
+                TCPManager.Instance.NotifyConnectionFailed();
+            }
         }
 
         public void CloseClient()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Net;
 using System;
+using UnityEngine;
 
 namespace TCP
 {
@@ -17,17 +18,18 @@ namespace TCP
 
         public event Action<byte[]> OnDataReceived;
         public event Action OnClientConnected;
+        public event Action OnConnectionFailed;
 
-
-        void Update()
+        private void Update()
         {
             if (IsServer)
                 UpdateServer();
+
             else
                 UpdateClient();
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             _listener?.Stop();
 
@@ -36,7 +38,6 @@ namespace TCP
 
             if (_connectedClient) _connectedClient.CloseClient(); //TODO: Check if this is correct
         }
-
 
         private void UpdateServer()
         {
@@ -107,6 +108,11 @@ namespace TCP
         public void SendDataToServer(byte[] data)
         {
             _connectedClient.SendData(data);
+        }
+
+        public void NotifyConnectionFailed()
+        {
+            OnConnectionFailed?.Invoke();
         }
     }
 }

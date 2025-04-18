@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Core
@@ -6,21 +7,22 @@ namespace Core
     {
         [SerializeField] private bool isPersistent = true;
 
-        private static T _instance;
+        private static T instance;
 
         public static T Instance
         {
             get
             {
-                if (!_instance)
-                    _instance = FindFirstObjectByType<T>();
+                if (!instance)
+                    instance = FindFirstObjectByType<T>();
 
-                if (!_instance)
-                    _instance = new GameObject(typeof(T).Name).AddComponent<T>();
+                if (!instance)
+                    instance = new GameObject(typeof(T).Name).AddComponent<T>();
 
-                return _instance;
+                return instance;
             }
         }
+
 
         void Awake()
         {

@@ -1,3 +1,4 @@
+using Inputs;
 using System;
 using System.Text;
 using TCP;
@@ -9,6 +10,9 @@ namespace UI
 {
     public class UIChatCanvas : MonoBehaviour
     {
+        [Header("References")]
+        [SerializeField] private InputReader inputReader;
+
         [Header("Scrolls")]
         [SerializeField] private ScrollRect chatScroll;
 
@@ -19,19 +23,24 @@ namespace UI
         [Header("Buttons")]
         [SerializeField] private Button sendButton;
 
-        void Start()
+        private void OnEnable()
         {
+            ValidateReferences();
+
             chatText.text = string.Empty;
             TCPManager.Instance.OnDataReceived += OnReceiveData;
             sendButton.onClick.AddListener(OnSendMessage);
+
+            inputReader.OnSendMessagePressed += OnSendMessage;
         }
 
-        void OnDestroy()
+        private void OnDisable()
         {
             TCPManager.Instance.OnDataReceived -= OnReceiveData;
             sendButton.onClick.RemoveListener(OnSendMessage);
-        }
 
+            inputReader.OnSendMessagePressed -= OnSendMessage;
+        }
 
         private void UpdateScroll()
         {
@@ -65,6 +74,50 @@ namespace UI
                 TCPManager.Instance.SendDataToServer(data);
 
             messageInputField.text = string.Empty;
+            messageInputField.ActivateInputField();
+        }
+
+        private void ValidateReferences()
+        {
+            if (!inputReader)
+            {
+                Debug.LogError($"{name}: {nameof(inputReader)} is null!" +
+                               $"\nDisabling component to avoid errors.");
+                enabled = false;
+                return;
+            }
+
+            if (!chatScroll)
+            {
+                Debug.LogError($"{name}: {nameof(chatScroll)} is null!" +
+                               $"\nDisabling component to avoid errors.");
+                enabled = false;
+                return;
+            }
+
+            if (!chatText)
+            {
+                Debug.LogError($"{name}: {nameof(chatText)} is null!" +
+                               $"\nDisabling component to avoid errors.");
+                enabled = false;
+                return;
+            }
+
+            if (!messageInputField)
+            {
+                Debug.LogError($"{name}: {nameof(messageInputField)} is null!" +
+                               $"\nDisabling component to avoid errors.");
+                enabled = false;
+                return;
+            }
+
+            if (!sendButton)
+            {
+                Debug.LogError($"{name}: {nameof(sendButton)} is null!" +
+                               $"\nDisabling component to avoid errors.");
+                enabled = false;
+                return;
+            }
         }
     }
 }

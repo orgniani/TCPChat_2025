@@ -990,6 +990,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Chat",
+            "id": "76e5ba2b-339c-4e4f-8bcd-1dbc44990b6b",
+            "actions": [
+                {
+                    "name": "SendMessage",
+                    "type": "Button",
+                    "id": "6c81c4ba-c46c-4334-841e-19bcfa57a272",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "b632ad0c-4c33-46dc-969e-8dc35a0ed25c",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "SendMessage",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [
