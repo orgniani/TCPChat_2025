@@ -2,6 +2,8 @@ using System.Net.Sockets;
 using System.Net;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
+using Network.Connection;
 
 namespace Network.Handlers
 {
@@ -64,7 +66,11 @@ namespace Network.Handlers
             _connectedClient = new TCPClientConnection(tcpClient);
 
             _connectedClient.OnDataReceived += (data) => OnDataReceived?.Invoke(data);
-            _connectedClient.OnConnectionFailed += () => OnConnectionFailed?.Invoke();
+
+            _connectedClient.OnConnectionFailed += () => {
+                Debug.LogWarning("OnConnectionFailed forwarded from TCPHandler");
+                OnConnectionFailed?.Invoke();
+            };
 
             tcpClient.BeginConnect(IPAddress.Parse(ip), port, _connectedClient.OnEndConnection, null);
         }

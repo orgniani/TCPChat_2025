@@ -1,6 +1,7 @@
 using Core;
 using System;
 using Network.Handlers;
+using UnityEngine;
 
 namespace Network
 {
@@ -28,8 +29,8 @@ namespace Network
             if (protocol == NetworkProtocol.TCP)
                 _handler = new TCPHandler();
 
-            else if (protocol == NetworkProtocol.UDP)
-                _handler = new UDPHandler();
+            //else if (protocol == NetworkProtocol.UDP)
+            //    _handler = new UDPHandler();
 
             _handler.OnDataReceived += (data) =>
             {
@@ -40,9 +41,12 @@ namespace Network
             };
 
             _handler.OnConnected += () => OnClientConnected?.Invoke();
-            _handler.OnConnectionFailed += () => OnConnectionFailed?.Invoke();
+            _handler.OnConnectionFailed += () =>
+            {
+                Debug.LogWarning("OnConnectionFailed reached NetworkManager");
+                OnConnectionFailed?.Invoke();
+            };
         }
-
 
         public void StartServer(int port)
         {

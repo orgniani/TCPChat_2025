@@ -3,16 +3,24 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Net;
 using UnityEngine;
+using Network.Connection;
+using System.Text;
+using System.Linq;
 
 namespace Network.Handlers
 {
+    /*
     public class UDPHandler : INetworkHandler, IUpdatableHandler
     {
-        private UdpClient _udpClient;
-        private IPEndPoint _remoteEndPoint;
-        private bool _isServer;
 
-        private readonly Queue<byte[]> _receivedDataQueue = new Queue<byte[]>();
+        private UdpClient _udpClient;
+
+        private readonly List<UDPClientConnection> _clients = new List<UDPClientConnection>();
+        private UDPClientConnection _connectedClient;
+        private IPEndPoint _clientEndPoint;
+
+        private bool _isServer;
+        private UDPConnectionValidator _validator;
 
         public event Action<byte[]> OnDataReceived;
         public event Action OnConnected;
@@ -26,10 +34,13 @@ namespace Network.Handlers
             {
                 _udpClient = new UdpClient(port);
                 BeginReceive();
+                Debug.Log($"[UDP Server] Listening on port {port}");
+
                 OnConnected?.Invoke();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Debug.LogWarning($"[UDP Server] Failed to start: {e.Message}");
                 OnConnectionFailed?.Invoke();
             }
         }
@@ -40,15 +51,29 @@ namespace Network.Handlers
 
             try
             {
-                _remoteEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-                _udpClient = new UdpClient();
-                _udpClient.Connect(_remoteEndPoint);
+                _clientEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+                _udpClient = new UdpClient(0);
+                _connectedClient = new UDPClientConnection();
 
                 BeginReceive();
-                OnConnected?.Invoke();
+                Debug.Log($"[UDP Client] Connecting to {_clientEndPoint}");
+
+                _validator = new UDPConnectionValidator(_udpClient, _clientEndPoint);
+                _validator.Validate(
+                    onSuccess: () =>
+                    {
+                        Debug.Log("[UDP Client] Connection validated.");
+                        OnConnected?.Invoke();
+                    },
+                    onFailure: () =>
+                    {
+                        Debug.LogWarning("[UDP Client] Connection validation failed.");
+                        OnConnectionFailed?.Invoke();
+                    });
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Debug.LogWarning($"[UDP Client] Connect failed: {e.Message}");
                 OnConnectionFailed?.Invoke();
             }
         }
@@ -64,17 +89,47 @@ namespace Network.Handlers
             {
                 IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
                 byte[] data = _udpClient.EndReceive(ar, ref sender);
+                string message = Encoding.UTF8.GetString(data);
 
                 if (_isServer)
-                    _remoteEndPoint = sender;
+                {
+                    Debug.Log($"[UDP Server] Received: {message} from {sender}");
 
-                lock (_receivedDataQueue)
-                    _receivedDataQueue.Enqueue(data);
+                    if (message == "PING")
+                    {
+                        _udpClient.Send(Encoding.UTF8.GetBytes("PONG"), 4, sender);
+                        return;
+                    }
+
+                    UDPClientConnection client = _clients.FirstOrDefault(c => c.Matches(sender));
+                    if (client == null)
+                    {
+                        client = new UDPClientConnection(sender);
+                        _clients.Add(client);
+                        Debug.Log($"[UDP Server] New client: {sender}");
+                    }
+
+                    client.EnqueueData(data);
+
+                    foreach (var c in _clients)
+                        _udpClient.Send(data, data.Length, c.RemoteEndPoint);
+                }
+                else
+                {
+                    if (_validator != null && message == "PONG")
+                    {
+                        Debug.Log("[UDP Client] Received PONG (validator)");
+                        _validator.OnPongReceived();
+                        return;
+                    }
+
+                    Debug.Log($"[UDP Client] Received: {message} from {sender}");
+                    _connectedClient.EnqueueData(data);
+                }
             }
-
             catch (Exception e)
             {
-                Debug.LogWarning($"UDPHandler receive error: {e.Message}");
+                Debug.LogWarning($"[UDP Receive] Error: {e.Message}");
             }
 
             if (_udpClient?.Client?.IsBound ?? false)
@@ -83,10 +138,14 @@ namespace Network.Handlers
 
         public void Update()
         {
-            lock (_receivedDataQueue)
+            if (_isServer)
             {
-                while (_receivedDataQueue.Count > 0)
-                    OnDataReceived?.Invoke(_receivedDataQueue.Dequeue());
+                foreach (var client in _clients)
+                    client.FlushReceivedData(OnDataReceived);
+            }
+            else
+            {
+                _connectedClient?.FlushReceivedData(OnDataReceived);
             }
         }
 
@@ -96,17 +155,21 @@ namespace Network.Handlers
             {
                 if (_isServer)
                 {
-                    if (_remoteEndPoint != null)
-                        _udpClient.Send(data, data.Length, _remoteEndPoint);
+                    foreach (var client in _clients)
+                        _udpClient.Send(data, data.Length, client.RemoteEndPoint);
                 }
-
                 else
-                    _udpClient.Send(data, data.Length);
+                {
+                    if (_clientEndPoint != null)
+                    {
+                        Debug.Log($"[UDP Client] Sending to server {_clientEndPoint}");
+                        _udpClient.Send(data, data.Length, _clientEndPoint);
+                    }
+                }
             }
-
             catch (Exception e)
             {
-                Debug.LogWarning($"UDP Send failed: {e.Message}");
+                Debug.LogWarning($"[UDP Send] Failed: {e.Message}");
             }
         }
 
@@ -114,6 +177,11 @@ namespace Network.Handlers
         {
             _udpClient?.Close();
             _udpClient = null;
+            _clients.Clear();
+            _connectedClient = null;
+
+            Debug.Log("[UDP] Disconnected");
         }
     }
+    */
 }

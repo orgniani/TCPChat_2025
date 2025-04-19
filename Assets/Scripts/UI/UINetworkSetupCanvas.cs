@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Network;
+using Core;
 
 namespace UI
 {
@@ -89,7 +90,6 @@ namespace UI
             try
             {
                 NetworkManager.Instance.ConnectToServer(ip, port);
-                MoveToChatScreen();
             }
 
             catch (Exception e)
@@ -100,15 +100,21 @@ namespace UI
 
         private void MoveToChatScreen()
         {
+            NetworkManager.Instance.OnClientConnected -= MoveToChatScreen;
+            NetworkManager.Instance.OnConnectionFailed -= HandleFailedConnection;
+
             gameObject.SetActive(false);
             chatCanvas.SetActive(true);
         }
 
         private void ShowError(string message)
         {
+            Debug.Log("ShowError: " + message);
+
             errorText.text = message;
             errorCanvas.SetActive(true);
         }
+
 
         private void OnCloseErrorCanvas()
         {
@@ -117,8 +123,13 @@ namespace UI
 
         private void HandleFailedConnection()
         {
+            NetworkManager.Instance.OnClientConnected -= MoveToChatScreen;
+            NetworkManager.Instance.OnConnectionFailed -= HandleFailedConnection;
+
             ShowError("Failed to connect to the server. It may be offline or unreachable.");
         }
+
+
         private bool ValidateInputs(out string ip, out int port)
         {
             ip = serverIpField.text;

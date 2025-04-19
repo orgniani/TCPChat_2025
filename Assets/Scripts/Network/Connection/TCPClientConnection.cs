@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System;
 using UnityEngine;
 
-namespace Network
+namespace Network.Connection
 {
     public class TCPClientConnection
     {
@@ -49,6 +49,7 @@ namespace Network
 
                 IsConnected = true;
             }
+
             catch (Exception e)
             {
                 Debug.LogError($"Client connection failed: {e.Message}");
