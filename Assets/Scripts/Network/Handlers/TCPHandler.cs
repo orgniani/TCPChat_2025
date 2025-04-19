@@ -66,6 +66,7 @@ namespace Network.Handlers
             _connectedClient.OnDataReceived += (data) => OnDataReceived?.Invoke(data);
             _connectedClient.OnConnectionFailed += () => OnConnectionFailed?.Invoke();
 
+            _connectedClient.OnConnected += () => OnConnected?.Invoke();
             tcpClient.BeginConnect(IPAddress.Parse(ip), port, _connectedClient.OnEndConnection, null);
         }
 

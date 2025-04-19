@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System;
 using UnityEngine;
+using Core;
 
 namespace Network
 {
@@ -16,6 +17,8 @@ namespace Network
         private readonly Queue<byte[]> _dataReceived = new Queue<byte[]>();
 
         public event Action<byte[]> OnDataReceived;
+
+        public event Action OnConnected;
         public event Action OnDisconnected;
         public event Action OnConnectionFailed;
 
@@ -47,12 +50,21 @@ namespace Network
                 _stream = _client.GetStream();
                 BeginRead();
 
-                IsConnected = true;
+                MainThreadDispatcher.Enqueue(() =>
+                {
+                    IsConnected = true;
+                    OnConnected?.Invoke();
+                });
+
             }
+
             catch (Exception e)
             {
-                Debug.LogError($"Client connection failed: {e.Message}");
-                OnConnectionFailed?.Invoke();
+                MainThreadDispatcher.Enqueue(() =>
+                {
+                    Debug.LogError($"Client connection failed: {e.Message}");
+                    OnConnectionFailed?.Invoke();
+                });
             }
         }
 
