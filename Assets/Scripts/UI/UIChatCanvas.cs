@@ -17,8 +17,11 @@ namespace UI
         [Header("Scrolls")]
         [SerializeField] private ScrollRect chatScroll;
 
+        [Header("Dialogue Box")]
+        [SerializeField] private UIDialogueBox dialogueBoxPrefab;
+        [SerializeField] private Transform chatContentParent;
+
         [Header("Text")]
-        [SerializeField] private TMP_Text chatText;
         [SerializeField] private TMP_InputField messageInputField;
 
         [Header("Buttons")]
@@ -28,7 +31,6 @@ namespace UI
         {
             ValidateReferences();
 
-            chatText.text = string.Empty;
             NetworkManager.Instance.OnDataReceived += OnReceiveData;
             sendButton.onClick.AddListener(OnSendMessage);
 
@@ -56,27 +58,49 @@ namespace UI
 
         private void OnReceiveData(byte[] data)
         {
-            chatText.text += Encoding.UTF8.GetString(data, 0, data.Length) + Environment.NewLine;
-            UpdateScroll();
+            string received = Encoding.UTF8.GetString(data, 0, data.Length);
+            string[] parts = received.Split(new[] { ':' }, 2);
+
+            if (parts.Length == 2)
+            {
+                string username = parts[0];
+                string message = parts[1];
+
+                AddDialogue(username, message);
+            }
+
+            else
+                Debug.LogWarning($"Invalid message format: {received}");
         }
+
 
         private void OnSendMessage()
         {
             if (string.IsNullOrEmpty(messageInputField.text))
                 return;
 
-            byte[] data = Encoding.UTF8.GetBytes(messageInputField.text);
+            string message = messageInputField.text;
+            string username = UserInfoManager.Instance.Username;
+
+            string fullMessage = $"{username}:{message}";
+            byte[] data = Encoding.UTF8.GetBytes(fullMessage);
 
             if (NetworkManager.Instance.IsServer)
             {
-                chatText.text += messageInputField.text + Environment.NewLine;
-                UpdateScroll();
+                AddDialogue(username, message);
             }
 
             NetworkManager.Instance.SendData(data);
 
             messageInputField.text = string.Empty;
             messageInputField.ActivateInputField();
+        }
+
+        private void AddDialogue(string username, string message)
+        {
+            var dialogueBox = Instantiate(dialogueBoxPrefab, chatContentParent);
+            dialogueBox.Setup(username, message);
+            UpdateScroll();
         }
 
         private void ValidateReferences()
@@ -92,14 +116,6 @@ namespace UI
             if (!chatScroll)
             {
                 Debug.LogError($"{name}: {nameof(chatScroll)} is null!" +
-                               $"\nDisabling component to avoid errors.");
-                enabled = false;
-                return;
-            }
-
-            if (!chatText)
-            {
-                Debug.LogError($"{name}: {nameof(chatText)} is null!" +
                                $"\nDisabling component to avoid errors.");
                 enabled = false;
                 return;

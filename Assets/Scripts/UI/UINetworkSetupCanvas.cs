@@ -62,7 +62,7 @@ namespace UI
             NetworkProtocol selectedProtocol = (NetworkProtocol)protocolDropdown.value;
             NetworkManager.Instance.SetProtocol(selectedProtocol);
 
-            //UserData.Username = usernameField.text;
+            UserInfoManager.Instance.Username = usernameField.text;
 
             try
             {
@@ -83,7 +83,7 @@ namespace UI
             NetworkProtocol selectedProtocol = (NetworkProtocol)protocolDropdown.value;
             NetworkManager.Instance.SetProtocol(selectedProtocol);
 
-            //UserData.Username = usernameField.text;
+            UserInfoManager.Instance.Username = usernameField.text;
 
             NetworkManager.Instance.OnClientConnected += MoveToChatScreen;
 
