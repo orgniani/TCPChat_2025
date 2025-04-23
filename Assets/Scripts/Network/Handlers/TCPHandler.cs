@@ -30,7 +30,7 @@ namespace Network.Handlers
                 {
                     _connectedClient.FlushReceivedData();
 
-                    if (_connectedClient.IsConnected)
+                    if (_connectedClient != null && _connectedClient.IsConnected)
                         _connectedClient.IsConnected = false;
                 }
             }
