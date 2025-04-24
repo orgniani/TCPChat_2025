@@ -2,6 +2,8 @@ using System.Net.Sockets;
 using System.Net;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
+using Core;
 
 namespace Network.Handlers
 {
@@ -28,10 +30,8 @@ namespace Network.Handlers
             {
                 if (_connectedClient != null)
                 {
-                    _connectedClient.FlushReceivedData();
-
-                    if (_connectedClient != null && _connectedClient.IsConnected)
-                        _connectedClient.IsConnected = false;
+                    if (_connectedClient != null)
+                        _connectedClient.FlushReceivedData();
                 }
             }
         }
@@ -65,8 +65,14 @@ namespace Network.Handlers
 
             _connectedClient.OnDataReceived += (data) => OnDataReceived?.Invoke(data);
             _connectedClient.OnConnectionFailed += () => OnConnectionFailed?.Invoke();
-
             _connectedClient.OnConnected += () => OnConnected?.Invoke();
+
+            _connectedClient.OnDisconnected += () =>
+            {
+                Debug.LogWarning("TCPHandler: Disconnected from server.");
+                MainThreadDispatcher.Enqueue(() => OnConnectionFailed?.Invoke());
+            };
+
             tcpClient.BeginConnect(IPAddress.Parse(ip), port, _connectedClient.OnEndConnection, null);
         }
 

@@ -30,6 +30,8 @@ namespace UI
         [SerializeField] private TMP_Text errorText;
         [SerializeField] private Button closeButton;
 
+        private NetworkErrorType _currentErrorType = NetworkErrorType.Unknown;
+
         private void OnEnable()
         {
             ValidateReferences();
@@ -101,31 +103,44 @@ namespace UI
         private void MoveToChatScreen()
         {
             NetworkManager.Instance.OnClientConnected -= MoveToChatScreen;
-            NetworkManager.Instance.OnConnectionFailed -= HandleFailedConnection;
-
-            gameObject.SetActive(false);
             chatCanvas.SetActive(true);
         }
 
-        private void ShowError(string message)
+        private void ShowError(string message, NetworkErrorType type = NetworkErrorType.Unknown)
         {
+            _currentErrorType = type;
             errorText.text = message;
+
             errorCanvas.SetActive(true);
         }
 
         private void OnCloseErrorCanvas()
         {
+            if (_currentErrorType == NetworkErrorType.ServerDisconnected)
+            {
+                Application.Quit();
+
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+#endif
+                return;
+            }
+
             errorCanvas.SetActive(false);
         }
 
         private void HandleFailedConnection()
         {
+            Debug.LogWarning("HandleFailedConnection CALLED!");
+
             MainThreadDispatcher.Enqueue(() =>
             {
                 NetworkManager.Instance.OnClientConnected -= MoveToChatScreen;
-                NetworkManager.Instance.OnConnectionFailed -= HandleFailedConnection;
 
-                ShowError("Failed to connect to the server. It may be offline or unreachable.");
+                var wasInChat = chatCanvas.activeSelf;
+                var type = wasInChat ? NetworkErrorType.ServerDisconnected : NetworkErrorType.ConnectionFailed;
+
+                ShowError("Failed to connect to the server. It may be offline or unreachable.", type);
             });
         }
 

@@ -22,7 +22,8 @@ namespace Network
         public event Action OnDisconnected;
         public event Action OnConnectionFailed;
 
-        public bool IsConnected { get; set; } = false;
+        private bool _isConnected = false;
+        public bool IsConnected => _isConnected;
 
         public TCPClientConnection(TcpClient client, bool isServer = false)
         {
@@ -31,6 +32,7 @@ namespace Network
             if (isServer)
             {
                 _stream = client.GetStream();
+                _isConnected = true;
                 BeginRead();
             }
         }
@@ -48,14 +50,10 @@ namespace Network
                 }
 
                 _stream = _client.GetStream();
+                _isConnected = true;
                 BeginRead();
 
-                MainThreadDispatcher.Enqueue(() =>
-                {
-                    IsConnected = true;
-                    OnConnected?.Invoke();
-                });
-
+                MainThreadDispatcher.Enqueue(() => OnConnected?.Invoke());
             }
 
             catch (Exception e)
@@ -92,13 +90,13 @@ namespace Network
             }
             catch
             {
-                OnDisconnected?.Invoke();
+                HandleDisconnect();
                 return;
             }
 
             if (bytesRead == 0)
             {
-                OnDisconnected?.Invoke();
+                HandleDisconnect();
                 return;
             }
 
@@ -130,6 +128,16 @@ namespace Network
         {
             if (_stream != null && _client.Connected)
                 _stream.Write(data, 0, data.Length);
+        }
+
+        private void HandleDisconnect()
+        {
+            if (!_isConnected) return;
+
+            _isConnected = false;
+            Close();
+
+            MainThreadDispatcher.Enqueue(() => OnDisconnected?.Invoke());
         }
 
         public void Close()
