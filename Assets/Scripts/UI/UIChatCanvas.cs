@@ -53,7 +53,7 @@ namespace UI
 
         private void OnDisable()
         {
-            NetworkManager.Instance.OnDataReceived -= OnReceiveData;
+            if (NetworkManager.Instance) NetworkManager.Instance.OnDataReceived -= OnReceiveData;
             sendButton.onClick.RemoveListener(OnSendMessage);
 
             inputReader.OnSendMessagePressed -= OnSendMessage;
@@ -68,7 +68,8 @@ namespace UI
 
         private IEnumerator ScrollToBottomNextFrame()
         {
-            yield return new WaitForEndOfFrame();
+            yield return null;
+            yield return null;
             chatScroll.verticalNormalizedPosition = 0f;
         }
 
@@ -110,6 +111,7 @@ namespace UI
             NetworkManager.Instance.SendData(data);
 
             CancelReply();
+            UpdateScroll();
         }
 
         private void AddDialogue(string username, string message, int replyToId)
@@ -119,9 +121,6 @@ namespace UI
             var dialogueBox = Instantiate(dialogueBoxPrefab, chatContentParent);
             dialogueBox.Setup(this, _messageCounter, username, message, replyToId);
             _messageCounter++;
-
-            UpdateScroll();
-
         }
 
         public void SetReplyTarget(int messageId, string author, string messagePreview)
@@ -129,6 +128,8 @@ namespace UI
             _replyingToId = messageId;
             replyPreviewText.text = $"Replying to {author}: {TrimMessage(messagePreview)}";
             replyPreviewObject.SetActive(true);
+
+            messageInputField.ActivateInputField();
         }
 
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Core;
+using Network.Connection;
 
 namespace Network.Handlers
 {
@@ -20,6 +21,8 @@ namespace Network.Handlers
 
         public void Update()
         {
+            if (!NetworkManager.Instance) return;
+
             if (NetworkManager.Instance.IsServer)
             {
                 foreach (var client in _clients)

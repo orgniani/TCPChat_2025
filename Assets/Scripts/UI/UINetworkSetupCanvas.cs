@@ -55,7 +55,7 @@ namespace UI
 
             closeButton.onClick.RemoveListener(OnCloseErrorCanvas);
 
-            NetworkManager.Instance.OnConnectionFailed -= HandleFailedConnection;
+            if (NetworkManager.Instance) NetworkManager.Instance.OnConnectionFailed -= HandleFailedConnection;
         }
 
         private void OnStartServer()

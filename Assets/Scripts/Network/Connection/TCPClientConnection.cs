@@ -4,7 +4,7 @@ using System;
 using UnityEngine;
 using Core;
 
-namespace Network
+namespace Network.Connection
 {
     public class TCPClientConnection
     {
