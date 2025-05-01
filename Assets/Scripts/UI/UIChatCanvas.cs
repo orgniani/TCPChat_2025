@@ -1,5 +1,4 @@
 using Inputs;
-using System;
 using System.Text;
 using Network;
 using TMPro;
@@ -38,6 +37,8 @@ namespace UI
         private Dictionary<int, ChatMessage> _messageDict = new();
         private int _messageCounter = 0;
 
+        private Coroutine _scrollCoroutine;
+
         private void OnEnable()
         {
             ValidateReferences();
@@ -49,6 +50,9 @@ namespace UI
             cancelReplyButton.onClick.AddListener(CancelReply);
 
             replyPreviewObject.SetActive(false);
+
+            if (_scrollCoroutine != null)
+                StopCoroutine(_scrollCoroutine);
         }
 
         private void OnDisable()
@@ -58,19 +62,30 @@ namespace UI
 
             inputReader.OnSendMessagePressed -= OnSendMessage;
 
+            if (_scrollCoroutine != null)
+                StopCoroutine(_scrollCoroutine);
+
             CancelReply();
         }
 
         private void UpdateScroll()
         {
-            StartCoroutine(ScrollToBottomNextFrame());
+            if (!gameObject.activeSelf) return;
+
+            if (_scrollCoroutine != null)
+                StopCoroutine(_scrollCoroutine);
+
+            chatScroll.verticalNormalizedPosition = 0f;
+            _scrollCoroutine = StartCoroutine(ScrollToBottomNextFrame());
         }
 
         private IEnumerator ScrollToBottomNextFrame()
         {
-            yield return null;
-            yield return null;
-            chatScroll.verticalNormalizedPosition = 0f;
+            for (int i = 0; i < 5; i++)
+            {
+                chatScroll.verticalNormalizedPosition = 0f;
+                yield return new WaitForEndOfFrame();
+            }
         }
 
         private void OnReceiveData(byte[] data)
@@ -111,7 +126,6 @@ namespace UI
             NetworkManager.Instance.SendData(data);
 
             CancelReply();
-            UpdateScroll();
         }
 
         private void AddDialogue(string username, string message, int replyToId)
@@ -121,6 +135,8 @@ namespace UI
             var dialogueBox = Instantiate(dialogueBoxPrefab, chatContentParent);
             dialogueBox.Setup(this, _messageCounter, username, message, replyToId);
             _messageCounter++;
+
+            UpdateScroll();
         }
 
         public void SetReplyTarget(int messageId, string author, string messagePreview)
