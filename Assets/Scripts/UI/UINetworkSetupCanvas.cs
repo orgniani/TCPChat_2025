@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Network;
 using Core;
+using Inputs;
 
 namespace UI
 {
@@ -172,69 +173,30 @@ namespace UI
 
         private void ValidateReferences()
         {
-            if (!serverIpField)
-            {
-                Debug.LogError($"{name}: {nameof(serverIpField)} is null!" +
-                               $"\nDisabling component to avoid errors.");
-                enabled = false;
-                return;
-            }
+            if (!ValidateReference(protocolDropdown, nameof(protocolDropdown))) return;
 
-            if (!serverPortField)
-            {
-                Debug.LogError($"{name}: {nameof(serverPortField)} is null!" +
-                               $"\nDisabling component to avoid errors.");
-                enabled = false;
-                return;
-            }
+            if (!ValidateReference(serverIpField, nameof(serverIpField))) return;
+            if (!ValidateReference(serverPortField, nameof(serverPortField))) return;
+            if (!ValidateReference(usernameField, nameof(usernameField))) return;
 
-            if (!startSeverButton)
-            {
-                Debug.LogError($"{name}: {nameof(startSeverButton)} is null!" +
-                               $"\nDisabling component to avoid errors.");
-                enabled = false;
-                return;
-            }
+            if (!ValidateReference(startSeverButton, nameof(startSeverButton))) return;
+            if (!ValidateReference(startClientButton, nameof(startClientButton))) return;
 
-            if (!startClientButton)
-            {
-                Debug.LogError($"{name}: {nameof(startClientButton)} is null!" +
-                               $"\nDisabling component to avoid errors.");
-                enabled = false;
-                return;
-            }
+            if (!ValidateReference(chatCanvas, nameof(chatCanvas))) return;
 
-            if (!chatCanvas)
-            {
-                Debug.LogError($"{name}: {nameof(chatCanvas)} is null!" +
-                               $"\nDisabling component to avoid errors.");
-                enabled = false;
-                return;
-            }
+            if (!ValidateReference(errorCanvas, nameof(errorCanvas))) return;
+            if (!ValidateReference(errorText, nameof(errorText))) return;
+            if (!ValidateReference(closeButton, nameof(closeButton))) return;
+        }
 
-            if (!errorCanvas)
-            {
-                Debug.LogError($"{name}: {nameof(errorCanvas)} is null!" +
-                               $"\nDisabling component to avoid errors.");
-                enabled = false;
-                return;
-            }
+        private bool ValidateReference(UnityEngine.Object reference, string referenceName)
+        {
+            if (reference != null) return true;
 
-            if (!errorText)
-            {
-                Debug.LogError($"{name}: {nameof(errorText)} is null!" +
-                               $"\nDisabling component to avoid errors.");
-                enabled = false;
-                return;
-            }
-
-            if (!closeButton)
-            {
-                Debug.LogError($"{name}: {nameof(closeButton)} is null!" +
-                               $"\nDisabling component to avoid errors.");
-                enabled = false;
-                return;
-            }
+            Debug.LogError($"{name}: {referenceName} is null!" +
+                           $"\nDisabling component to avoid errors.");
+            enabled = false;
+            return false;
         }
     }
 }
